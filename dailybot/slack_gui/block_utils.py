@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pydantic import BaseModel
 from typing import List, Optional
 
 from jira import Issue
@@ -25,35 +26,19 @@ ISSUE_STATUSES = [
 ]
 
 
-@dataclass
-class SlackSelectorOption:
-    text: str
-    value: Optional[str] = None
 
-    def __post_init__(self):
-        self.value = self.value or self.text
 
-    def as_dict(self):
-        return {
-            "text": {
-                "type": "plain_text",
-                "text": self.text,
-                "emoji": True
-            },
-            "value": self.value
-        }
+
+
+
 
 
 def generate_issue_status_selector_component(status: Status, optional_statuses: List[str] = ISSUE_STATUSES) -> dict:
-    initial_option = SlackSelectorOption(status.name).as_dict()
-    options = [initial_option, *(SlackSelectorOption(s).as_dict() for s in optional_statuses if s != status.name)]
+    initial_option = StaticSelect.Option(status.name).as_dict()
+    options = [initial_option, *(StaticSelect.Option(s).as_dict() for s in optional_statuses if s != status.name)]
     return {
         "type": "static_select",
-        "placeholder": {
-            "type": "plain_text",
-            "text": "Select current status",
-            "emoji": True
-        },
+        "placeholder": block_plain_text(text="Select current status"),
         "initial_option": initial_option,
         "options": options,
         "action_id": SELECT_STATUS_ISSUE_DAILY_FORM
@@ -68,11 +53,7 @@ def generate_issue_report_component(user: User, issue: Issue, issue_reports: Lis
     return [
         {
             "type": "header",
-            "text": {
-                "type": "plain_text",
-                "text": f'{issue.key}: {issue.get_field("summary")}',
-                "emoji": True
-            }
+            "text": block_plain_text(text=f'{issue.key}: {issue.get_field("summary")}')
         },
         {
             "type": "actions",
@@ -100,11 +81,7 @@ def generate_issue_report_component(user: User, issue: Issue, issue_reports: Lis
                 ),
                 {
                     "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Open in Jira",
-                        "emoji": True
-                    },
+                    "text": block_plain_text(text="Open in Jira"),
                     "value": f"link-issue-{issue.key}",
                     "url": issue.permalink(),
                     "action_id": ISSUE_LINK_ACTION
@@ -119,20 +96,12 @@ def generate_issue_report_component(user: User, issue: Issue, issue_reports: Lis
                 "type": "plain_text_input",
                 "action_id": ISSUE_SUMMERY_ACTION
             },
-            "label": {
-                "type": "plain_text",
-                "text": "Progress details",
-                "emoji": True
-            }
+            "label": block_plain_text(text="Progress details")
         },
         *([{
             "type": "context",
             "elements": [
-                {
-                    "type": "plain_text",
-                    "text": f"Stored data: {issue_report.details}",
-                    "emoji": True
-                }
+                block_plain_text(text=f"Stored data: {issue_report.details}")
             ]
         }] if issue_report and issue_report.details else []),
         DIVIDER
@@ -149,21 +118,9 @@ def generate_daily_modal(user: User, issues: List[Issue], daily: Daily):
     return {
         "type": "modal",
         "callback_id": DAILY_MODAL_SUBMISSION,
-        "submit": {
-            "type": "plain_text",
-            "text": "Submit",
-            "emoji": True
-        },
-        "close": {
-            "type": "plain_text",
-            "text": "Cancel",
-            "emoji": True
-        },
-        "title": {
-            "type": "plain_text",
-            "text": "Daily Report",
-            "emoji": True
-        },
+        "submit": block_plain_text(text="Submit"),
+        "close": block_plain_text(text="Cancel"),
+        "title": block_plain_text(text="Daily Report"),
         "blocks": [
             {
                 "type": "section",
@@ -184,20 +141,12 @@ def generate_daily_modal(user: User, issues: List[Issue], daily: Daily):
                     "multiline": True,
                     "action_id": GENERAL_COMMENTS_ACTION
                 },
-                "label": {
-                    "type": "plain_text",
-                    "text": "Other comments / blockers",
-                    "emoji": True
-                },
+                "label": block_plain_text(text="Other comments / blockers"),
             },
             *([{
                 "type": "context",
                 "elements": [
-                    {
-                        "type": "plain_text",
-                        "text": f"Stored data: {reports.general_comments}",
-                        "emoji": True
-                    }
+                    block_plain_text(text=f"Stored data: {reports.general_comments}"),
                 ]
             }] if reports and reports.general_comments else []),
         ]
@@ -239,35 +188,23 @@ def generate_home_tab_view(teams: List[Team]):
                     "type": "plain_text_input",
                     "action_id": JIRA_SERVER_ACTION
                 },
-                "hint": {
-                    "type": "plain_text",
-                    "text": "https://<your-domain>.atlassian.net/ (if using cloud)  *<!> Dont forget the 'https://'*",
-                },
-                "label": {
-                    "type": "plain_text",
-                    "text": "Jira server url",
-                    "emoji": True
-                }
+                "hint": block_plain_text(
+                    text="https://<your-domain>.atlassian.net/ (if using cloud)  *<!> Dont forget the 'https://'*",
+                    emoji=False
+                ),
+                "label": block_plain_text(text="Jira server url"),
             },
             {
                 "type": "input",
                 "block_id": JIRA_HOST_TYPE,
-                "label": {
-                    "type": "plain_text",
-                    "text": "Select your Jira host type",
-                    "emoji": True
-                },
+                "label": block_plain_text(text="Select your Jira host type"),
                 "element": {
                     "type": "static_select",
-                    "placeholder": {
-                        "type": "plain_text",
-                        "text": "Select options",
-                        "emoji": True
-                    },
-                    "initial_option": SlackSelectorOption(text=JiraHostType.Cloud.name).as_dict(),
+                    "placeholder": block_plain_text(text="Select options"),
+                    "initial_option": BlockSelectorOption(text=JiraHostType.Cloud.name).as_dict(),
                     "options": [
-                        SlackSelectorOption(text=JiraHostType.Cloud.name).as_dict(),
-                        SlackSelectorOption(text=JiraHostType.Local.name).as_dict()
+                        BlockSelectorOption(text=JiraHostType.Cloud.name).as_dict(),
+                        BlockSelectorOption(text=JiraHostType.Local.name).as_dict()
                     ],
                     "action_id": JIRA_HOST_TYPE
                 }
@@ -279,11 +216,7 @@ def generate_home_tab_view(teams: List[Team]):
                     "type": "plain_text_input",
                     "action_id": JIRA_EMAIL_ACTION
                 },
-                "label": {
-                    "type": "plain_text",
-                    "text": "Jira E-Mail",
-                    "emoji": True
-                }
+                "label": block_plain_text(text="Jira E-Mail"),
             },
             DIVIDER,
             {
@@ -293,11 +226,7 @@ def generate_home_tab_view(teams: List[Team]):
                     "type": "plain_text_input",
                     "action_id": JIRA_API_TOKEN_ACTION
                 },
-                "label": {
-                    "type": "plain_text",
-                    "text": "Jira API Token",
-                    "emoji": True
-                }
+                "label": block_plain_text(text="Jira API Token"),
             },
             {
                 "type": "context",
@@ -324,7 +253,7 @@ def generate_home_tab_view(teams: List[Team]):
                         "text": "Teams",
                         "emoji": True
                     },
-                    "options": [SlackSelectorOption(text=team.name).as_dict() for team in teams],
+                    "options": [BlockSelectorOption(text=team.name).as_dict() for team in teams],
                     "action_id": SELECT_USER_TEAM
                 }
             },
@@ -365,7 +294,7 @@ def generate_home_tab_view_set_jira_keys(user: User):
                     "text": "Select options",
                     "emoji": True
                 },
-                "options": [SlackSelectorOption(text=project.key).as_dict() for project in projects],
+                "options": [BlockSelectorOption(text=project.key).as_dict() for project in projects],
                 "action_id": SELECT_USER_BOARD
             }
         }]
