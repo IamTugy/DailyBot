@@ -4,7 +4,7 @@ RUN apk update && \
     apk add --no-cache gcc musl-dev linux-headers python3-dev make libffi-dev openssl-dev g++ ca-certificates libtool m4 libuv-dev automake autoconf curl
 
 RUN pip install -U pip
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN pip install poetry
 ENV PATH="/app/.venv/bin:/root/.local/bin:$PATH"
 
 COPY ./dailybot/ /app/dailybot/
