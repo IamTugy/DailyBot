@@ -235,7 +235,7 @@ def generate_home_tab_view_set_jira_keys(user: User):
     return {
         "type": "home",
         "blocks": serialize_blocks([
-            HeaderBlock(Text(type=TextType.PlainText, text="Configurations is set")),
+            HeaderBlock(text=Text(type=TextType.PlainText, text="Configurations is set")),
             *field
         ])
     }
@@ -245,7 +245,7 @@ def generate_home_tab_view_user_configured():
     return {
         "type": "home",
         "blocks": serialize_blocks([
-            HeaderBlock(Text(type=TextType.PlainText, text="Well done! Every thing is configured!")),
+            HeaderBlock(text=Text(type=TextType.PlainText, text="Well done! Every thing is configured!")),
             SectionBlock(text=Text(
                 type=TextType.MarkdownText,
                 text=("Click the + button in the text area and write `daily`. "
@@ -282,7 +282,7 @@ def generate_user_not_exists_modal():
         "type": "modal",
         "title": Text(type=TextType.PlainText, text="Daily Report").dict(exclude_none=True, by_alias=True),
         "blocks": serialize_blocks([
-            HeaderBlock(Text(type=TextType.PlainText, text="Your user is not defined!")),
+            HeaderBlock(text=Text(type=TextType.PlainText, text="Your user is not defined!")),
             SectionBlock(text=Text(
                 type=TextType.MarkdownText,
                 text=("Press the `Add apps` button in the bottom left corner (bottom of the users list) and add the "
@@ -325,7 +325,7 @@ def generate_general_comments_with_gui(general_comments: str, user_id: str) -> L
         return []
 
     return [
-        HeaderBlock(Text(type=TextType.PlainText, text="General Comments")),
+        HeaderBlock(text=Text(type=TextType.PlainText, text="General Comments")),
         ContextBlock(elements=[Text(type=TextType.MarkdownText, text=f"<@{user_id}>")]),
         SectionBlock(text=Text(type=TextType.MarkdownText, text=general_comments)),
         DividerBlock(),
@@ -362,7 +362,7 @@ def generate_daily_message(user: User, daily: Daily, with_gui: bool = False):
             for user_id, report in daily.reports.items()])
         blocks = [SectionBlock(text=Text(type=TextType.MarkdownText, text=text))] if text else []
     return serialize_blocks([
-        HeaderBlock(Text(type=TextType.PlainText, text=f"Daily Report for {daily.date}")),
+        HeaderBlock(text=Text(type=TextType.PlainText, text=f"Daily Report for {daily.date}")),
         ContextBlock(elements=[Text(type=TextType.PlainText, text="Feel free to extend and comment in the thread.")]),
         *blocks,
     ])
