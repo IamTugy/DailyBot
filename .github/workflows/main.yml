@@ -1,5 +1,6 @@
 name: 'Deploy'
-on: {}
+on:
+  deployment
 jobs:
   build:
     runs-on: ubuntu-latest
