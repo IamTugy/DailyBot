@@ -1,6 +1,16 @@
-# Get poetry from source
-pip install poetry
-# Make poetry available to $PATH
-source $HOME/.poetry/env
-# Export poetry packages to requirements.txt to be used for installing the pipy packages
-poetry export -f requirements.txt -o requirements.txt
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+indent() {
+  sed "s/^/       /"
+}
+
+puts-step() {
+  echo "-----> $@"
+}
+
+puts-step "Installing dependencies with poetry..."
+# Use a venv, but install locally
+poetry config settings.virtualenvs.in-project true 2>&1 | indent
+poetry install --no-dev 2>&1 | indent
