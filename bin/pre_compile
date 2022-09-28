@@ -1,5 +1,5 @@
 # Get poetry from source
-curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+pip install poetry
 # Make poetry available to $PATH
 source $HOME/.poetry/env
 # Export poetry packages to requirements.txt to be used for installing the pipy packages
