@@ -65,7 +65,7 @@ def get_my_issues(user: User) -> List[Issue]:
     # TODO: SUOER IMPORTANT : think about how to understand what status to filter, not all the same in each board!
     while user.jira_keys:  # if user has no jira keys don't enter
         chunk = jira_client.search_issues(
-            f'assignee = currentUser() and project in ({", ".join(user.jira_keys)}) and status not in (DONE, "TO DO", Closed)',
+            f'assignee = currentUser() and project in ({", ".join(user.jira_keys)}) and status not in (DONE, "TO APPROVE", "TO DO", Closed)',
             startAt=i, maxResults=chunk_size)
         i += chunk_size
         issues += chunk.iterable
