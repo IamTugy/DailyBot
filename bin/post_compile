@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+indent() {
+  sed "s/^/       /"
+}
+
+puts-step() {
+  echo "-----> $@"
+}
+
+puts-step "Installing dependencies with poetry..."
+# Use a venv, but install locally
+poetry config virtualenvs.in-project true 2>&1 | indent
+poetry install --no-dev 2>&1 | indent
