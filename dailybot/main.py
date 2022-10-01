@@ -3,9 +3,9 @@ from typing import Tuple, List, Optional, Dict
 
 from slack_bolt import App
 
-from dailybot.block_utils import (generate_daily_modal, generate_home_tab_view, generate_user_from_config_action,
-                                  generate_home_tab_view_set_jira_keys, generate_home_tab_view_user_configured,
-                                  generate_user_not_exists_modal, generate_daily_message)
+from dailybot.slack_gui.blocks import (generate_daily_modal, generate_home_tab_view, generate_user_from_config_action,
+                                       generate_home_tab_view_set_jira_keys, generate_home_tab_view_user_configured,
+                                       generate_user_not_exists_modal, generate_daily_message)
 from dailybot.constants import (DAILY_MODAL_SUBMISSION, ACTIONS_ISSUE_DAILY_FORM, ISSUE_LINK_ACTION,
                                 ISSUE_SUMMERY_ACTION, GENERAL_COMMENTS_ACTION, BULK_ID_SEPERATOR,
                                 SAVE_USER_CONFIGURATIONS, SELECT_USER_BOARD, SELECT_USER_TEAM, DAILY_MODAL, SHOW_DAILY,
@@ -26,10 +26,10 @@ def daily_report(ack, body, client):
     user = User.get_from_db(user_id)
     daily = Daily.get_from_db(user.team)
 
+    view = (generate_daily_modal(user=user, issues=get_my_issues(user), daily=daily) if user else generate_user_not_exists_modal())
     client.views_open(
         trigger_id=body["trigger_id"],
-        view=(generate_daily_modal(user=user, issues=get_my_issues(user), daily=daily)
-              if user else generate_user_not_exists_modal())
+        view=view
     )
     ack()
 

@@ -19,6 +19,7 @@ urllib3 = "^1.26.12"
 pymongo = "^4.2.0"
 dnspython = "^2.2.1"
 dacite = "^1.6.0"
+pydantic = "^1.10.2"
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.4.0"

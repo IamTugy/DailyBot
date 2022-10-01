@@ -15,6 +15,7 @@ TYPE_OR_SELECT_USER_BOARD = "type_or_select_user_board"
 SELECT_USER_BOARD = "select_user_board"
 TYPE_USER_BOARD = "type_user_board"
 SAVE_USER_BOARD = "save_user_board"
+OPEN_IN_JIRA = "open_in_jira"
 JIRA_HOST_TYPE = "jira_host_type"
 JIRA_SERVER_ACTION = 'jira_server_url_action'
 JIRA_EMAIL_ACTION = 'jira_email_action'
