@@ -41,7 +41,7 @@ def get_optional_transitions(jira_server_url: str, jira_email: str, jira_api_tok
     return jira_client.transitions(issue_key)
 
 
-def get_optional_statuses(user: User, issue_key: str):
+def get_optional_statuses(user: User, issue_key: str) -> List[str]:
     transitions = get_optional_transitions(
         jira_server_url=user.jira_server_url,
         jira_email=user.jira_email,

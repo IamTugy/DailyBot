@@ -105,7 +105,9 @@ class BlockElementType(Enum):
 
 
 class BaseElement(BaseModel):
-    ELEMENT_OPTIONS = [element_type.name for element_type in BlockElementType]
+    @property
+    def element_options(self):
+        return [element_type.name for element_type in BlockElementType]
 
     type: BlockElementType
 
@@ -121,7 +123,7 @@ class BaseElement(BaseModel):
     @validator('type')
     def type_validate(cls, v: BlockElementType):
         if v not in [BlockElementType.StaticSelect]:
-            raise ValueError(f'Element is not one of {cls.ELEMENT_OPTIONS} options')
+            raise ValueError(f'Element is not one of {cls.element_options} options')
 
 
 class ConfirmableElement(BaseElement):
@@ -198,16 +200,16 @@ class SectionBlock(Block):
     accessory: BaseElement | None = None
 
 
-
-
 class SelectMenu(SelectElement):
-    ELEMENT_OPTIONS = [BlockElementType.StaticSelect]
+    @property
+    def element_options(self):
+        return [BlockElementType.StaticSelect]
 
-    options: List[Option] = Field(default_factory=list, max_items=100)
-    # defines the placeholder text shown on the menu.
+    options: List[Option] = Field(default=None, max_items=100)
+    # defines the placeholder text shown on the menu.g
     placeholder: limited_text(max_text_length=150, restrict_type=TextType.PlainText)
     initial_option: Option | OptionGroup | None = None
-    option_groups: List[OptionGroup] | None = Field(default_factory=list, max_items=100)
+    option_groups: List[OptionGroup] | None = Field(default=None, max_items=100)
 
     @classmethod
     @validator('options')
@@ -248,9 +250,11 @@ class SelectMenu(SelectElement):
 
 
 class Selector(SelectElement):
-    ELEMENT_OPTIONS = [BlockElementType.Checkboxes, BlockElementType.RadioButtons]
+    @property
+    def element_options(self):
+        return [BlockElementType.Checkboxes, BlockElementType.RadioButtons]
 
-    options: List[Option] = Field(default_factory=list, min_items=1, max_items=10)
+    options: List[Option] = Field(min_items=1, max_items=10)
     initial_option: List[Option] | None = None
 
     @classmethod
@@ -264,7 +268,9 @@ class Selector(SelectElement):
 
 
 class Button(ConfirmableElement):
-    ELEMENT_OPTIONS = [BlockElementType.Button]
+    @property
+    def element_options(self):
+        return [BlockElementType.Button]
 
     text: limited_text(max_text_length=75, restrict_type=TextType.PlainText)
 
@@ -293,7 +299,9 @@ class DispatchActionConfiguration(BaseElement):
 
 
 class Input(BaseElement):
-    ELEMENT_OPTIONS = [BlockElementType.PlainTextInput]
+    @property
+    def element_options(self):
+        return [BlockElementType.PlainTextInput]
 
     # Defines the placeholder text shown in the plain-text input
     placeholder: limited_text(max_text_length=150, restrict_type=TextType.PlainText) | None = None

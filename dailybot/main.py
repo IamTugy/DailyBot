@@ -26,10 +26,10 @@ def daily_report(ack, body, client):
     user = User.get_from_db(user_id)
     daily = Daily.get_from_db(user.team)
 
+    view = (generate_daily_modal(user=user, issues=get_my_issues(user), daily=daily) if user else generate_user_not_exists_modal())
     client.views_open(
         trigger_id=body["trigger_id"],
-        view=(generate_daily_modal(user=user, issues=get_my_issues(user), daily=daily)
-              if user else generate_user_not_exists_modal())
+        view=view
     )
     ack()
 

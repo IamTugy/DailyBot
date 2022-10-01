@@ -42,11 +42,12 @@ def issue_report_component_blocks(user: User, issue: Issue, issue_reports: List[
                     placeholder=Text(type=TextType.PlainText, text="Select current status"),
                     initial_option=initial_option,
                     options=[initial_option, *(
-                        Option(text=Text(type=TextType.PlainText, text=s.name), value=s.name)
+                        Option(text=Text(type=TextType.PlainText, text=s), value=s)
                         for s in get_optional_statuses(user=user, issue_key=issue.key) if s != status.name
                     )]
                 ),
                 Button(
+                    type=BlockElementType.Button,
                     action_id=ISSUE_LINK_ACTION,
                     text=Text(type=TextType.PlainText, text="Open in Jira"),
                     value=f"link-issue-{issue.key}",
