@@ -5,7 +5,7 @@ from dailybot.constants import (DAILY_MODAL_SUBMISSION, ACTIONS_ISSUE_DAILY_FORM
                                 SELECT_USER_TEAM, SELECT_USER_BOARD, JIRA_EMAIL_ACTION, JIRA_API_TOKEN_ACTION,
                                 JIRA_SERVER_ACTION, JiraHostType, JIRA_HOST_TYPE, MAX_LEN_SLACK_SELECTOR,
                                 TYPE_USER_BOARD, TYPE_OR_SELECT_USER_BOARD, SAVE_USER_BOARD, IGNORE_ISSUE_IN_DAILY_FORM,
-                                SELECT_STATUS_ISSUE_DAILY_FORM, OPEN_IN_JIRA)
+                                SELECT_STATUS_ISSUE_DAILY_FORM, OPEN_IN_JIRA, ADD_TEAM)
 from dailybot.jira_utils import get_jira_projects, get_optional_statuses
 from dailybot.mongodb import Team, User, SlackUserData, Daily, DailyIssueReport
 
@@ -182,7 +182,12 @@ def generate_home_tab_view(teams: List[Team]):
                     options=[Option(text=Text(type=TextType.PlainText, text=team.name),
                                     value=team.name) for team in teams]
                 )
-            ),
+            )
+            if teams else
+            SectionBlock(text=Text(
+                type=TextType.MarkdownText,
+                text=f"*No teams available, use `{ADD_TEAM}` command to create one*"
+            )),
             ActionsBlock(
                 elements=[Button(
                     type=BlockElementType.Button,
@@ -211,6 +216,11 @@ def generate_home_tab_view_set_jira_keys(user: User):
                                     value=project.key) for project in projects]
                 )
             )
+            if projects else
+            SectionBlock(text=Text(
+                type=TextType.MarkdownText,
+                text="*No jira projects available*"
+            )),
         ]
     else:
         field = [
