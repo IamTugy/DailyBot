@@ -136,7 +136,7 @@ def generate_home_tab_view(teams: List[Team]):
             InputBlock(
                 block_id=JIRA_HOST_TYPE,
                 label=Text(type=TextType.PlainText, text="Select your Jira host type"),
-                element=SelectElement(
+                element=SelectMenu(
                     type=BlockElementType.StaticSelect,
                     action_id=JIRA_HOST_TYPE,
                     placeholder=Text(type=TextType.PlainText, text="Select options"),
@@ -175,7 +175,7 @@ def generate_home_tab_view(teams: List[Team]):
             SectionBlock(
                 block_id=SELECT_USER_TEAM,
                 text=Text(type=TextType.MarkdownText, text="*Select your team*"),
-                accessory=SelectElement(
+                accessory=SelectMenu(
                     type=BlockElementType.StaticSelect,
                     action_id=SELECT_USER_TEAM,
                     placeholder=Text(type=TextType.PlainText, text="Teams"),
