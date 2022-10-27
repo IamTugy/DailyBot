@@ -249,6 +249,15 @@ class SelectMenu(SelectElement):
                     'initial_option should exactly match one of the options within options or option_groups')
 
 
+class MultiSelectMenu(SelectMenu):
+    @property
+    def element_options(self):
+        return [BlockElementType.MultiStaticSelect]
+
+    max_selected_items: int | None = Field(None, mt=1)
+
+
+
 class Selector(SelectElement):
     @property
     def element_options(self):

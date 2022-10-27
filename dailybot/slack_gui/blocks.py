@@ -203,12 +203,20 @@ def generate_home_tab_view(teams: List[Team]):
 def generate_home_tab_view_set_jira_keys(user: User):
     projects = get_jira_projects(user)
 
-    if len(projects) < MAX_LEN_SLACK_SELECTOR:
-        field = [
+    if not projects:
+        fields = [
+            SectionBlock(text=Text(
+                type=TextType.MarkdownText,
+                text="*No jira projects available*"
+            )),
+        ]
+
+    elif len(projects) < MAX_LEN_SLACK_SELECTOR:
+        fields = [
             SectionBlock(
                 block_id=TYPE_OR_SELECT_USER_BOARD,
                 text=Text(type=TextType.MarkdownText, text="*Select your Jira boards from the select options*"),
-                accessory=SelectElement(
+                accessory=MultiSelectMenu(
                     type=BlockElementType.MultiStaticSelect,
                     action_id=SELECT_USER_BOARD,
                     placeholder=Text(type=TextType.PlainText, text="Select options"),
@@ -216,14 +224,9 @@ def generate_home_tab_view_set_jira_keys(user: User):
                                     value=project.key) for project in projects]
                 )
             )
-            if projects else
-            SectionBlock(text=Text(
-                type=TextType.MarkdownText,
-                text="*No jira projects available*"
-            )),
         ]
     else:
-        field = [
+        fields = [
             InputBlock(
                 block_id=TYPE_OR_SELECT_USER_BOARD,
                 label=Text(type=TextType.PlainText, text="Please write you issue keys:"),
@@ -247,7 +250,7 @@ def generate_home_tab_view_set_jira_keys(user: User):
         "type": "home",
         "blocks": serialize_blocks([
             HeaderBlock(text=Text(type=TextType.PlainText, text="Configurations is set")),
-            *field
+            *fields
         ])
     }
 
