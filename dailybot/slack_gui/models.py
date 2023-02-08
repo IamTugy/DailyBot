@@ -1,7 +1,9 @@
 from enum import Enum
 from typing import List
 
-from pydantic import BaseModel, constr, validator, Field
+from pydantic import BaseModel, validator, Field
+
+from dailybot.utils.pydentic_serializers import truncated_text
 
 
 class TextType(Enum):
@@ -37,7 +39,7 @@ class Text(BaseModel):
 
 def limited_text(max_text_length: int = 3000, restrict_type: TextType | None = None):
     class LimitedText(Text):
-        text: constr(max_length=max_text_length)
+        text: truncated_text(limit=max_text_length)  # = Field(..., max_length=max_text_length)
 
         @classmethod
         @validator('type', allow_reuse=True)
@@ -68,7 +70,7 @@ class Option(BaseModel):
     text: limited_text(75)
 
     # A unique string value that will be passed to your app when this option is chosen.
-    value: constr(max_length=75)
+    value: truncated_text(limit=75)  # = Field(..., max_length=75)
 
     # defines a line of descriptive text shown below the text field beside the radio button.
     description: limited_text(max_text_length=75, restrict_type=TextType.PlainText) | None = None
@@ -78,7 +80,7 @@ class Option(BaseModel):
     # Maximum length for this field is 3000 characters.
     # If you're using url, you'll still receive an interaction payload and will need to send an
     # acknowledgement response.
-    url: constr(max_length=3000) | None = None
+    url: truncated_text(limit=3000) | None = None  # Field(None, max_length=3000)
 
 
 class OptionGroup(BaseModel):
@@ -114,7 +116,7 @@ class BaseElement(BaseModel):
     # An identifier for the action triggered when a menu option is selected.
     # You can use this when you receive an interaction payload to identify the source of the action.
     # Should be unique among all other action_ids in the containing block.
-    action_id: constr(max_length=255)
+    action_id: truncated_text(limit=255)  # = Field(..., max_length=255)
 
     class Config:
         use_enum_values = True
@@ -152,7 +154,7 @@ class Block(BaseModel):
     # You can use this block_id when you receive an interaction payload to identify the source of the action.
     # block_id should be unique for each message and each iteration of a message.
     # If a message is updated, use a new block_id.
-    block_id: constr(max_length=255) | None = None
+    block_id: truncated_text(limit=255) | None = None  # Field(None, max_length=255)
 
     class Config:
         use_enum_values = True
@@ -285,14 +287,14 @@ class Button(ConfirmableElement):
 
     # A URL to load in the user's browser when the button is clicked.
     # If you're using url, you'll still receive an interaction payload and will need to send an acknowledgement response
-    url: constr(max_length=3000) | None = None
+    url: truncated_text(limit=3000) | None = None  # Field(None, max_length=3000)
 
     # The value to send along with the interaction payload.
-    value: constr(max_length=2000) | None = None
+    value: truncated_text(limit=2000) | None = None  # Field(None, max_length=2000)
     style: ButtonStyle | None = None
 
     # t a button element. This label will be read out by screen readers instead of the button text object
-    accessibility_label: constr(max_length=75) | None = None
+    accessibility_label: truncated_text(limit=75) | None = None  # Field(None, max_length=75)
 
 
 class TriggerActions(Enum):

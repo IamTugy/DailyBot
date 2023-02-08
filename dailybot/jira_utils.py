@@ -52,10 +52,25 @@ def get_optional_statuses(user: User, issue_key: str) -> List[str]:
     return list(set(transition['to']['name'] for transition in transitions if transition.get('isAvailable', True)))
 
 
-def get_my_issues(user: User, logger) -> List[Issue]:
+def get_jira_issues(client: JIRA, jira_keys: List[str]) -> List[Issue]:
     issues: List[Issue] = []
     i = 0
     chunk_size = 100
+    # TODO: SUPER IMPORTANT : think about how to understand what status to filter, not all the same in each board!
+    while jira_keys:  # if user has no jira keys don't enter
+        chunk = client.search_issues(
+            f'assignee = currentUser() and project in ({", ".join(jira_keys)}) '
+            f'and status not in (DONE, "TO DO", Closed)',
+            startAt=i, maxResults=chunk_size
+        )
+        i += chunk_size
+        issues += chunk.iterable
+        if i >= chunk.total:
+            break
+    return issues
+
+
+def get_my_issues(user: User, logger) -> List[Issue]:
     try:
         jira_client = get_jira(
             jira_server_url=user.jira_server_url,
@@ -63,18 +78,10 @@ def get_my_issues(user: User, logger) -> List[Issue]:
             jira_api_token=user.jira_api_token,
             jira_host_type=user.jira_host_type
         )
-        # TODO: SUOER IMPORTANT : think about how to understand what status to filter, not all the same in each board!
-        while user.jira_keys:  # if user has no jira keys don't enter
-            chunk = jira_client.search_issues(
-                f'assignee = currentUser() and project in ({", ".join(user.jira_keys)}) and status not in (DONE, "TO DO", Closed)',
-                startAt=i, maxResults=chunk_size)
-            i += chunk_size
-            issues += chunk.iterable
-            if i >= chunk.total:
-                break
+        return get_jira_issues(jira_client, user.jira_keys)
     except JIRAError:
         logger.exception(f"Got exception while getting jira issues for user {user.jira_email}", params=dict(user=user))
-    return issues
+    return []
 
 
 def get_issue(user: User, issue_key: str) -> Issue:
