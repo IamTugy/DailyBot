@@ -259,7 +259,6 @@ class MultiSelectMenu(SelectMenu):
     max_selected_items: int | None = Field(None, mt=1)
 
 
-
 class Selector(SelectElement):
     @property
     def element_options(self):

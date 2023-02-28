@@ -80,7 +80,7 @@ def get_my_issues(user: User, logger) -> List[Issue]:
         )
         return get_jira_issues(jira_client, user.jira_keys)
     except JIRAError:
-        logger.exception(f"Got exception while getting jira issues for user {user.jira_email}", params=dict(user=user))
+        logger.exception(f"Got exception while getting jira issues for user {user.jira_email}", extra=dict(user=user))
     return []
 
 
