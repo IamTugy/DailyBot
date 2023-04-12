@@ -23,6 +23,25 @@ TEAMS_COLLECTION_NAME = 'teams'
 DAILIES_COLLECTION_NAME = 'dailys'
 
 
+DAILYS_CACHE = "DAILYS_CACHE"
+USERS_CACHE = "USERS_CACHE"
+TEAMS_CACHE = "TEAMS_CACHE"
+memory_cache = {
+    DAILYS_CACHE: {},
+    TEAMS_CACHE: {},
+    USERS_CACHE: {}
+}
+
+
+def init_cache():
+    memory_cache[DAILYS_CACHE] = Daily.get_all_db_instances()
+    memory_cache[TEAMS_CACHE] = Team.get_all_db_instances()
+    memory_cache[USERS_CACHE] = User.get_all_db_instances()
+
+
+init_cache()
+
+
 @dataclass
 class DailyIssueReport:
     key: str
@@ -60,13 +79,18 @@ class Daily:
     def save_in_db(self):
         dailies_collection = get_collection(DAILIES_COLLECTION_NAME)
         dailies_collection.replace_one({"_id": self.formatted_id}, asdict(self), upsert=True)
+        memory_cache[DAILYS_CACHE][self.formatted_id] = asdict(self)
 
     @classmethod
     def get_from_db(cls, team: str, daily_date: Optional[str] = None) -> "Daily":
         daily_date = daily_date or str(date.today())
+        daily: dict = memory_cache[DAILYS_CACHE].get(cls._format_id(daily_date, team))
+        return daily or cls(team=team, date=daily_date)
+
+    @classmethod
+    def get_all_db_instances(cls) -> Dict[str, "Daily"]:
         dailies_collection = get_collection(DAILIES_COLLECTION_NAME)
-        daily: dict = dailies_collection.find_one({"_id": cls._format_id(daily_date, team)})
-        return from_dict(cls, daily) if daily else cls(team=team, date=daily_date)
+        return {daily["_id"]: from_dict(cls, daily) for daily in dailies_collection.find({})}
 
 
 @dataclass
@@ -81,18 +105,16 @@ class Team:
     def save_in_db(self):
         teams_collection = get_collection(TEAMS_COLLECTION_NAME)
         teams_collection.replace_one({"_id": self._id}, asdict(self), upsert=True)
+        memory_cache[TEAMS_CACHE][self._id] = asdict(self)
 
     @classmethod
-    def get_from_db(cls, team) -> "Team":
-        teams_collection = get_collection(TEAMS_COLLECTION_NAME)
-        team: dict = teams_collection.find_one({"_id": team})
-        if team:
-            return from_dict(cls, team)
+    def get_from_db(cls, team) -> Optional["Team"]:
+        return memory_cache[TEAMS_CACHE].get(team)
 
     @classmethod
-    def get_all_teams_from_db(cls) -> List["Team"]:
+    def get_all_db_instances(cls) -> Dict[str, "Team"]:
         teams_collection = get_collection(TEAMS_COLLECTION_NAME)
-        return [from_dict(cls, team) for team in teams_collection.find({})]
+        return {team["_id"]: from_dict(cls, team) for team in teams_collection.find({})}
 
 
 @dataclass
@@ -120,19 +142,24 @@ class User:
     def save_in_db(self):
         users_collection = get_collection(USERS_COLLECTION_NAME)
         users_collection.replace_one({"_id": self._id}, asdict(self), upsert=True)
+        memory_cache[USERS_CACHE][self._id] = asdict(self)
         return self
 
     def update_jira_keys(self, jira_keys):
         users_collection = get_collection(USERS_COLLECTION_NAME)
         users_collection.update_one({"_id": self._id}, {"$set": {"jira_keys": jira_keys}})
+        self.jira_keys = jira_keys
+        memory_cache[USERS_CACHE][self._id] = asdict(self)
         return self
 
     @classmethod
     def get_from_db(cls, user_id: str) -> Optional["User"]:
-        users_collection = get_collection(USERS_COLLECTION_NAME)
-        user: dict = users_collection.find_one({"_id": user_id})
-        if user:
-            return from_dict(cls, user)
+        return memory_cache[USERS_CACHE].get(user_id)
+
+    @classmethod
+    def get_all_db_instances(cls) -> Dict[str, "User"]:
+        dailies_collection = get_collection(USERS_COLLECTION_NAME)
+        return {user["_id"]: from_dict(cls, user) for user in dailies_collection.find({})}
 
 
 def get_database():
@@ -144,7 +171,7 @@ def get_database():
     return MongoClient(connection_string)
 
 
-@lru_cache()
+@lru_cache
 def get_daily_reports_database():
     database = get_database()
     return database[DAILY_DB]
