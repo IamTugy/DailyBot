@@ -33,15 +33,6 @@ memory_cache = {
 }
 
 
-def init_cache():
-    memory_cache[DAILYS_CACHE] = Daily.get_all_db_instances()
-    memory_cache[TEAMS_CACHE] = Team.get_all_db_instances()
-    memory_cache[USERS_CACHE] = User.get_all_db_instances()
-
-
-init_cache()
-
-
 @dataclass
 class DailyIssueReport:
     key: str
@@ -185,3 +176,12 @@ def get_collection(collection_name: str):
 def get_users() -> List[User]:
     users_collection = get_collection(USERS_COLLECTION_NAME)
     return [from_dict(User, user) for user in users_collection.find({})]
+
+
+def init_cache():
+    memory_cache[DAILYS_CACHE] = Daily.get_all_db_instances()
+    memory_cache[TEAMS_CACHE] = Team.get_all_db_instances()
+    memory_cache[USERS_CACHE] = User.get_all_db_instances()
+
+
+init_cache()
