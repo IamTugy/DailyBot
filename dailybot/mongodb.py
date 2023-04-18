@@ -75,7 +75,7 @@ class Daily:
     @classmethod
     def get_from_db(cls, team: str, daily_date: Optional[str] = None) -> "Daily":
         daily_date = daily_date or str(date.today())
-        daily: dict = memory_cache[DAILYS_CACHE].get(cls._format_id(daily_date, team))
+        daily = memory_cache[DAILYS_CACHE].get(cls._format_id(daily_date, team))
         return daily or cls(team=team, date=daily_date)
 
     @classmethod
