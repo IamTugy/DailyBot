@@ -70,7 +70,7 @@ class Daily:
     def save_in_db(self):
         dailies_collection = get_collection(DAILIES_COLLECTION_NAME)
         dailies_collection.replace_one({"_id": self.formatted_id}, asdict(self), upsert=True)
-        memory_cache[DAILYS_CACHE][self.formatted_id] = asdict(self)
+        memory_cache[DAILYS_CACHE][self.formatted_id] = self
 
     @classmethod
     def get_from_db(cls, team: str, daily_date: Optional[str] = None) -> "Daily":
